@@ -114,52 +114,6 @@ export class PrismaClient<
   $use(cb: Prisma.Middleware): void
 
 /**
-   * Executes a prepared raw query and returns the number of affected rows.
-   * @example
-   * ```
-   * const result = await prisma.$executeRaw`UPDATE User SET cool = ${true} WHERE email = ${'user@email.com'};`
-   * ```
-   * 
-   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
-   */
-  $executeRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: any[]): Prisma.PrismaPromise<number>;
-
-  /**
-   * Executes a raw query and returns the number of affected rows.
-   * Susceptible to SQL injections, see documentation.
-   * @example
-   * ```
-   * const result = await prisma.$executeRawUnsafe('UPDATE User SET cool = $1 WHERE email = $2 ;', true, 'user@email.com')
-   * ```
-   * 
-   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
-   */
-  $executeRawUnsafe<T = unknown>(query: string, ...values: any[]): Prisma.PrismaPromise<number>;
-
-  /**
-   * Performs a prepared raw query and returns the `SELECT` data.
-   * @example
-   * ```
-   * const result = await prisma.$queryRaw`SELECT * FROM User WHERE id = ${1} OR email = ${'user@email.com'};`
-   * ```
-   * 
-   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
-   */
-  $queryRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: any[]): Prisma.PrismaPromise<T>;
-
-  /**
-   * Performs a raw query and returns the `SELECT` data.
-   * Susceptible to SQL injections, see documentation.
-   * @example
-   * ```
-   * const result = await prisma.$queryRawUnsafe('SELECT * FROM User WHERE id = $1 OR email = $2;', 1, 'user@email.com')
-   * ```
-   * 
-   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
-   */
-  $queryRawUnsafe<T = unknown>(query: string, ...values: any[]): Prisma.PrismaPromise<T>;
-
-  /**
    * Allows the running of a sequence of read/write operations that are guaranteed to either succeed or fail as a whole.
    * @example
    * ```
@@ -172,10 +126,24 @@ export class PrismaClient<
    * 
    * Read more in our [docs](https://www.prisma.io/docs/concepts/components/prisma-client/transactions).
    */
-  $transaction<P extends Prisma.PrismaPromise<any>[]>(arg: [...P], options?: { isolationLevel?: Prisma.TransactionIsolationLevel }): $Utils.JsPromise<runtime.Types.Utils.UnwrapTuple<P>>
+  $transaction<P extends Prisma.PrismaPromise<any>[]>(arg: [...P]): $Utils.JsPromise<runtime.Types.Utils.UnwrapTuple<P>>
 
-  $transaction<R>(fn: (prisma: Omit<PrismaClient, runtime.ITXClientDenyList>) => $Utils.JsPromise<R>, options?: { maxWait?: number, timeout?: number, isolationLevel?: Prisma.TransactionIsolationLevel }): $Utils.JsPromise<R>
+  $transaction<R>(fn: (prisma: Omit<PrismaClient, runtime.ITXClientDenyList>) => $Utils.JsPromise<R>, options?: { maxWait?: number, timeout?: number }): $Utils.JsPromise<R>
 
+  /**
+   * Executes a raw MongoDB command and returns the result of it.
+   * @example
+   * ```
+   * const user = await prisma.$runCommandRaw({
+   *   aggregate: 'User',
+   *   pipeline: [{ $match: { name: 'Bob' } }, { $project: { email: true, _id: false } }],
+   *   explain: false,
+   * })
+   * ```
+   * 
+   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
+   */
+  $runCommandRaw(command: Prisma.InputJsonObject): Prisma.PrismaPromise<Prisma.JsonObject>
 
   $extends: $Extensions.ExtendsHook<'extends', Prisma.TypeMapCb, ExtArgs>
 
@@ -286,7 +254,7 @@ export namespace Prisma {
 
   /**
    * Prisma Client JS version: 5.8.1
-   * Query Engine version: 78caf6feeaed953168c64e15a249c3e9a033ebe2
+   * Query Engine version: 473ed3124229e22d881cb7addf559799debae1ab
    */
   export type PrismaVersion = {
     client: string
@@ -720,7 +688,7 @@ export namespace Prisma {
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     meta: {
       modelProps: 'user' | 'task' | 'timeBlock' | 'pomodoroSession' | 'pomodoroRound'
-      txIsolationLevel: Prisma.TransactionIsolationLevel
+      txIsolationLevel: never
     },
     model: {
       User: {
@@ -782,6 +750,14 @@ export namespace Prisma {
           groupBy: {
             args: Prisma.UserGroupByArgs<ExtArgs>,
             result: $Utils.Optional<UserGroupByOutputType>[]
+          }
+          findRaw: {
+            args: Prisma.UserFindRawArgs<ExtArgs>,
+            result: Prisma.JsonObject
+          }
+          aggregateRaw: {
+            args: Prisma.UserAggregateRawArgs<ExtArgs>,
+            result: Prisma.JsonObject
           }
           count: {
             args: Prisma.UserCountArgs<ExtArgs>,
@@ -849,6 +825,14 @@ export namespace Prisma {
             args: Prisma.TaskGroupByArgs<ExtArgs>,
             result: $Utils.Optional<TaskGroupByOutputType>[]
           }
+          findRaw: {
+            args: Prisma.TaskFindRawArgs<ExtArgs>,
+            result: Prisma.JsonObject
+          }
+          aggregateRaw: {
+            args: Prisma.TaskAggregateRawArgs<ExtArgs>,
+            result: Prisma.JsonObject
+          }
           count: {
             args: Prisma.TaskCountArgs<ExtArgs>,
             result: $Utils.Optional<TaskCountAggregateOutputType> | number
@@ -914,6 +898,14 @@ export namespace Prisma {
           groupBy: {
             args: Prisma.TimeBlockGroupByArgs<ExtArgs>,
             result: $Utils.Optional<TimeBlockGroupByOutputType>[]
+          }
+          findRaw: {
+            args: Prisma.TimeBlockFindRawArgs<ExtArgs>,
+            result: Prisma.JsonObject
+          }
+          aggregateRaw: {
+            args: Prisma.TimeBlockAggregateRawArgs<ExtArgs>,
+            result: Prisma.JsonObject
           }
           count: {
             args: Prisma.TimeBlockCountArgs<ExtArgs>,
@@ -981,6 +973,14 @@ export namespace Prisma {
             args: Prisma.PomodoroSessionGroupByArgs<ExtArgs>,
             result: $Utils.Optional<PomodoroSessionGroupByOutputType>[]
           }
+          findRaw: {
+            args: Prisma.PomodoroSessionFindRawArgs<ExtArgs>,
+            result: Prisma.JsonObject
+          }
+          aggregateRaw: {
+            args: Prisma.PomodoroSessionAggregateRawArgs<ExtArgs>,
+            result: Prisma.JsonObject
+          }
           count: {
             args: Prisma.PomodoroSessionCountArgs<ExtArgs>,
             result: $Utils.Optional<PomodoroSessionCountAggregateOutputType> | number
@@ -1047,6 +1047,14 @@ export namespace Prisma {
             args: Prisma.PomodoroRoundGroupByArgs<ExtArgs>,
             result: $Utils.Optional<PomodoroRoundGroupByOutputType>[]
           }
+          findRaw: {
+            args: Prisma.PomodoroRoundFindRawArgs<ExtArgs>,
+            result: Prisma.JsonObject
+          }
+          aggregateRaw: {
+            args: Prisma.PomodoroRoundAggregateRawArgs<ExtArgs>,
+            result: Prisma.JsonObject
+          }
           count: {
             args: Prisma.PomodoroRoundCountArgs<ExtArgs>,
             result: $Utils.Optional<PomodoroRoundCountAggregateOutputType> | number
@@ -1058,21 +1066,9 @@ export namespace Prisma {
     other: {
       payload: any
       operations: {
-        $executeRawUnsafe: {
-          args: [query: string, ...values: any[]],
-          result: any
-        }
-        $executeRaw: {
-          args: [query: TemplateStringsArray | Prisma.Sql, ...values: any[]],
-          result: any
-        }
-        $queryRawUnsafe: {
-          args: [query: string, ...values: any[]],
-          result: any
-        }
-        $queryRaw: {
-          args: [query: TemplateStringsArray | Prisma.Sql, ...values: any[]],
-          result: any
+        $runCommandRaw: {
+          args: Prisma.InputJsonObject,
+          result: Prisma.JsonObject
         }
       }
     }
@@ -1796,6 +1792,33 @@ export namespace Prisma {
     ): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
 
     /**
+     * Find zero or more Users that matches the filter.
+     * @param {UserFindRawArgs} args - Select which filters you would like to apply.
+     * @example
+     * const user = await prisma.user.findRaw({
+     *   filter: { age: { $gt: 25 } } 
+     * })
+    **/
+    findRaw(
+      args?: UserFindRawArgs
+    ): Prisma.PrismaPromise<JsonObject>
+
+    /**
+     * Perform aggregation operations on a User.
+     * @param {UserAggregateRawArgs} args - Select which aggregations you would like to apply.
+     * @example
+     * const user = await prisma.user.aggregateRaw({
+     *   pipeline: [
+     *     { $match: { status: "registered" } },
+     *     { $group: { _id: "$country", total: { $sum: 1 } } }
+     *   ]
+     * })
+    **/
+    aggregateRaw(
+      args?: UserAggregateRawArgs
+    ): Prisma.PrismaPromise<JsonObject>
+
+    /**
      * Count the number of Users.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
@@ -2190,7 +2213,6 @@ export namespace Prisma {
      * The data used to create many Users.
      */
     data: UserCreateManyInput | UserCreateManyInput[]
-    skipDuplicates?: boolean
   }
 
 
@@ -2286,6 +2308,36 @@ export namespace Prisma {
      * Filter which Users to delete
      */
     where?: UserWhereInput
+  }
+
+
+  /**
+   * User findRaw
+   */
+  export type UserFindRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The query predicate filter. If unspecified, then all documents in the collection will match the predicate. ${@link https://docs.mongodb.com/manual/reference/operator/query MongoDB Docs}.
+     */
+    filter?: InputJsonValue
+    /**
+     * Additional options to pass to the `find` command ${@link https://docs.mongodb.com/manual/reference/command/find/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+
+  /**
+   * User aggregateRaw
+   */
+  export type UserAggregateRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * An array of aggregation stages to process and transform the document stream via the aggregation pipeline. ${@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline MongoDB Docs}.
+     */
+    pipeline?: InputJsonValue[]
+    /**
+     * Additional options to pass to the `aggregate` command ${@link https://docs.mongodb.com/manual/reference/command/aggregate/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
   }
 
 
@@ -2805,6 +2857,33 @@ export namespace Prisma {
     ): Prisma__TaskClient<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
 
     /**
+     * Find zero or more Tasks that matches the filter.
+     * @param {TaskFindRawArgs} args - Select which filters you would like to apply.
+     * @example
+     * const task = await prisma.task.findRaw({
+     *   filter: { age: { $gt: 25 } } 
+     * })
+    **/
+    findRaw(
+      args?: TaskFindRawArgs
+    ): Prisma.PrismaPromise<JsonObject>
+
+    /**
+     * Perform aggregation operations on a Task.
+     * @param {TaskAggregateRawArgs} args - Select which aggregations you would like to apply.
+     * @example
+     * const task = await prisma.task.aggregateRaw({
+     *   pipeline: [
+     *     { $match: { status: "registered" } },
+     *     { $group: { _id: "$country", total: { $sum: 1 } } }
+     *   ]
+     * })
+    **/
+    aggregateRaw(
+      args?: TaskAggregateRawArgs
+    ): Prisma.PrismaPromise<JsonObject>
+
+    /**
      * Count the number of Tasks.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
@@ -3193,7 +3272,6 @@ export namespace Prisma {
      * The data used to create many Tasks.
      */
     data: TaskCreateManyInput | TaskCreateManyInput[]
-    skipDuplicates?: boolean
   }
 
 
@@ -3289,6 +3367,36 @@ export namespace Prisma {
      * Filter which Tasks to delete
      */
     where?: TaskWhereInput
+  }
+
+
+  /**
+   * Task findRaw
+   */
+  export type TaskFindRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The query predicate filter. If unspecified, then all documents in the collection will match the predicate. ${@link https://docs.mongodb.com/manual/reference/operator/query MongoDB Docs}.
+     */
+    filter?: InputJsonValue
+    /**
+     * Additional options to pass to the `find` command ${@link https://docs.mongodb.com/manual/reference/command/find/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+
+  /**
+   * Task aggregateRaw
+   */
+  export type TaskAggregateRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * An array of aggregation stages to process and transform the document stream via the aggregation pipeline. ${@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline MongoDB Docs}.
+     */
+    pipeline?: InputJsonValue[]
+    /**
+     * Additional options to pass to the `aggregate` command ${@link https://docs.mongodb.com/manual/reference/command/aggregate/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
   }
 
 
@@ -3793,6 +3901,33 @@ export namespace Prisma {
     ): Prisma__TimeBlockClient<$Result.GetResult<Prisma.$TimeBlockPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
 
     /**
+     * Find zero or more TimeBlocks that matches the filter.
+     * @param {TimeBlockFindRawArgs} args - Select which filters you would like to apply.
+     * @example
+     * const timeBlock = await prisma.timeBlock.findRaw({
+     *   filter: { age: { $gt: 25 } } 
+     * })
+    **/
+    findRaw(
+      args?: TimeBlockFindRawArgs
+    ): Prisma.PrismaPromise<JsonObject>
+
+    /**
+     * Perform aggregation operations on a TimeBlock.
+     * @param {TimeBlockAggregateRawArgs} args - Select which aggregations you would like to apply.
+     * @example
+     * const timeBlock = await prisma.timeBlock.aggregateRaw({
+     *   pipeline: [
+     *     { $match: { status: "registered" } },
+     *     { $group: { _id: "$country", total: { $sum: 1 } } }
+     *   ]
+     * })
+    **/
+    aggregateRaw(
+      args?: TimeBlockAggregateRawArgs
+    ): Prisma.PrismaPromise<JsonObject>
+
+    /**
      * Count the number of TimeBlocks.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
@@ -4182,7 +4317,6 @@ export namespace Prisma {
      * The data used to create many TimeBlocks.
      */
     data: TimeBlockCreateManyInput | TimeBlockCreateManyInput[]
-    skipDuplicates?: boolean
   }
 
 
@@ -4278,6 +4412,36 @@ export namespace Prisma {
      * Filter which TimeBlocks to delete
      */
     where?: TimeBlockWhereInput
+  }
+
+
+  /**
+   * TimeBlock findRaw
+   */
+  export type TimeBlockFindRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The query predicate filter. If unspecified, then all documents in the collection will match the predicate. ${@link https://docs.mongodb.com/manual/reference/operator/query MongoDB Docs}.
+     */
+    filter?: InputJsonValue
+    /**
+     * Additional options to pass to the `find` command ${@link https://docs.mongodb.com/manual/reference/command/find/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+
+  /**
+   * TimeBlock aggregateRaw
+   */
+  export type TimeBlockAggregateRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * An array of aggregation stages to process and transform the document stream via the aggregation pipeline. ${@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline MongoDB Docs}.
+     */
+    pipeline?: InputJsonValue[]
+    /**
+     * Additional options to pass to the `aggregate` command ${@link https://docs.mongodb.com/manual/reference/command/aggregate/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
   }
 
 
@@ -4719,6 +4883,33 @@ export namespace Prisma {
     ): Prisma__PomodoroSessionClient<$Result.GetResult<Prisma.$PomodoroSessionPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
 
     /**
+     * Find zero or more PomodoroSessions that matches the filter.
+     * @param {PomodoroSessionFindRawArgs} args - Select which filters you would like to apply.
+     * @example
+     * const pomodoroSession = await prisma.pomodoroSession.findRaw({
+     *   filter: { age: { $gt: 25 } } 
+     * })
+    **/
+    findRaw(
+      args?: PomodoroSessionFindRawArgs
+    ): Prisma.PrismaPromise<JsonObject>
+
+    /**
+     * Perform aggregation operations on a PomodoroSession.
+     * @param {PomodoroSessionAggregateRawArgs} args - Select which aggregations you would like to apply.
+     * @example
+     * const pomodoroSession = await prisma.pomodoroSession.aggregateRaw({
+     *   pipeline: [
+     *     { $match: { status: "registered" } },
+     *     { $group: { _id: "$country", total: { $sum: 1 } } }
+     *   ]
+     * })
+    **/
+    aggregateRaw(
+      args?: PomodoroSessionAggregateRawArgs
+    ): Prisma.PrismaPromise<JsonObject>
+
+    /**
      * Count the number of PomodoroSessions.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
@@ -5107,7 +5298,6 @@ export namespace Prisma {
      * The data used to create many PomodoroSessions.
      */
     data: PomodoroSessionCreateManyInput | PomodoroSessionCreateManyInput[]
-    skipDuplicates?: boolean
   }
 
 
@@ -5203,6 +5393,36 @@ export namespace Prisma {
      * Filter which PomodoroSessions to delete
      */
     where?: PomodoroSessionWhereInput
+  }
+
+
+  /**
+   * PomodoroSession findRaw
+   */
+  export type PomodoroSessionFindRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The query predicate filter. If unspecified, then all documents in the collection will match the predicate. ${@link https://docs.mongodb.com/manual/reference/operator/query MongoDB Docs}.
+     */
+    filter?: InputJsonValue
+    /**
+     * Additional options to pass to the `find` command ${@link https://docs.mongodb.com/manual/reference/command/find/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+
+  /**
+   * PomodoroSession aggregateRaw
+   */
+  export type PomodoroSessionAggregateRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * An array of aggregation stages to process and transform the document stream via the aggregation pipeline. ${@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline MongoDB Docs}.
+     */
+    pipeline?: InputJsonValue[]
+    /**
+     * Additional options to pass to the `aggregate` command ${@link https://docs.mongodb.com/manual/reference/command/aggregate/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
   }
 
 
@@ -5704,6 +5924,33 @@ export namespace Prisma {
     ): Prisma__PomodoroRoundClient<$Result.GetResult<Prisma.$PomodoroRoundPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
 
     /**
+     * Find zero or more PomodoroRounds that matches the filter.
+     * @param {PomodoroRoundFindRawArgs} args - Select which filters you would like to apply.
+     * @example
+     * const pomodoroRound = await prisma.pomodoroRound.findRaw({
+     *   filter: { age: { $gt: 25 } } 
+     * })
+    **/
+    findRaw(
+      args?: PomodoroRoundFindRawArgs
+    ): Prisma.PrismaPromise<JsonObject>
+
+    /**
+     * Perform aggregation operations on a PomodoroRound.
+     * @param {PomodoroRoundAggregateRawArgs} args - Select which aggregations you would like to apply.
+     * @example
+     * const pomodoroRound = await prisma.pomodoroRound.aggregateRaw({
+     *   pipeline: [
+     *     { $match: { status: "registered" } },
+     *     { $group: { _id: "$country", total: { $sum: 1 } } }
+     *   ]
+     * })
+    **/
+    aggregateRaw(
+      args?: PomodoroRoundAggregateRawArgs
+    ): Prisma.PrismaPromise<JsonObject>
+
+    /**
      * Count the number of PomodoroRounds.
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
@@ -6091,7 +6338,6 @@ export namespace Prisma {
      * The data used to create many PomodoroRounds.
      */
     data: PomodoroRoundCreateManyInput | PomodoroRoundCreateManyInput[]
-    skipDuplicates?: boolean
   }
 
 
@@ -6191,6 +6437,36 @@ export namespace Prisma {
 
 
   /**
+   * PomodoroRound findRaw
+   */
+  export type PomodoroRoundFindRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The query predicate filter. If unspecified, then all documents in the collection will match the predicate. ${@link https://docs.mongodb.com/manual/reference/operator/query MongoDB Docs}.
+     */
+    filter?: InputJsonValue
+    /**
+     * Additional options to pass to the `find` command ${@link https://docs.mongodb.com/manual/reference/command/find/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+
+  /**
+   * PomodoroRound aggregateRaw
+   */
+  export type PomodoroRoundAggregateRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * An array of aggregation stages to process and transform the document stream via the aggregation pipeline. ${@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline MongoDB Docs}.
+     */
+    pipeline?: InputJsonValue[]
+    /**
+     * Additional options to pass to the `aggregate` command ${@link https://docs.mongodb.com/manual/reference/command/aggregate/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+
+  /**
    * PomodoroRound without action
    */
   export type PomodoroRoundDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6209,16 +6485,6 @@ export namespace Prisma {
   /**
    * Enums
    */
-
-  export const TransactionIsolationLevel: {
-    ReadUncommitted: 'ReadUncommitted',
-    ReadCommitted: 'ReadCommitted',
-    RepeatableRead: 'RepeatableRead',
-    Serializable: 'Serializable'
-  };
-
-  export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
-
 
   export const UserScalarFieldEnum: {
     id: 'id',
@@ -6299,14 +6565,6 @@ export namespace Prisma {
   };
 
   export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
-
-
-  export const NullsOrder: {
-    first: 'first',
-    last: 'last'
-  };
-
-  export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 
 
   /**
@@ -6417,11 +6675,11 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     email?: SortOrder
-    name?: SortOrderInput | SortOrder
+    name?: SortOrder
     password?: SortOrder
-    workInterval?: SortOrderInput | SortOrder
-    breakInterval?: SortOrderInput | SortOrder
-    intervalsCount?: SortOrderInput | SortOrder
+    workInterval?: SortOrder
+    breakInterval?: SortOrder
+    intervalsCount?: SortOrder
     tasks?: TaskOrderByRelationAggregateInput
     timeBlocks?: TimeBlockOrderByRelationAggregateInput
     pomodoroSessions?: PomodoroSessionOrderByRelationAggregateInput
@@ -6450,11 +6708,11 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     email?: SortOrder
-    name?: SortOrderInput | SortOrder
+    name?: SortOrder
     password?: SortOrder
-    workInterval?: SortOrderInput | SortOrder
-    breakInterval?: SortOrderInput | SortOrder
-    intervalsCount?: SortOrderInput | SortOrder
+    workInterval?: SortOrder
+    breakInterval?: SortOrder
+    intervalsCount?: SortOrder
     _count?: UserCountOrderByAggregateInput
     _avg?: UserAvgOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
@@ -6496,8 +6754,8 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     name?: SortOrder
-    priority?: SortOrderInput | SortOrder
-    isCompleted?: SortOrderInput | SortOrder
+    priority?: SortOrder
+    isCompleted?: SortOrder
     userId?: SortOrder
     user?: UserOrderByWithRelationInput
   }
@@ -6521,8 +6779,8 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     name?: SortOrder
-    priority?: SortOrderInput | SortOrder
-    isCompleted?: SortOrderInput | SortOrder
+    priority?: SortOrder
+    isCompleted?: SortOrder
     userId?: SortOrder
     _count?: TaskCountOrderByAggregateInput
     _max?: TaskMaxOrderByAggregateInput
@@ -6562,7 +6820,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     name?: SortOrder
-    color?: SortOrderInput | SortOrder
+    color?: SortOrder
     duration?: SortOrder
     order?: SortOrder
     userId?: SortOrder
@@ -6589,7 +6847,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     name?: SortOrder
-    color?: SortOrderInput | SortOrder
+    color?: SortOrder
     duration?: SortOrder
     order?: SortOrder
     userId?: SortOrder
@@ -6631,7 +6889,7 @@ export namespace Prisma {
     id?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    isCompleted?: SortOrderInput | SortOrder
+    isCompleted?: SortOrder
     userId?: SortOrder
     user?: UserOrderByWithRelationInput
     rounds?: PomodoroRoundOrderByRelationAggregateInput
@@ -6654,7 +6912,7 @@ export namespace Prisma {
     id?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    isCompleted?: SortOrderInput | SortOrder
+    isCompleted?: SortOrder
     userId?: SortOrder
     _count?: PomodoroSessionCountOrderByAggregateInput
     _max?: PomodoroSessionMaxOrderByAggregateInput
@@ -6690,7 +6948,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     totalSeconds?: SortOrder
-    isCompleted?: SortOrderInput | SortOrder
+    isCompleted?: SortOrder
     pomodoroSessionId?: SortOrder
     pomodoroSession?: PomodoroSessionOrderByWithRelationInput
   }
@@ -6713,7 +6971,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     totalSeconds?: SortOrder
-    isCompleted?: SortOrderInput | SortOrder
+    isCompleted?: SortOrder
     pomodoroSessionId?: SortOrder
     _count?: PomodoroRoundCountOrderByAggregateInput
     _avg?: PomodoroRoundAvgOrderByAggregateInput
@@ -6765,7 +7023,6 @@ export namespace Prisma {
   }
 
   export type UserUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     email?: StringFieldUpdateOperationsInput | string
@@ -6780,7 +7037,6 @@ export namespace Prisma {
   }
 
   export type UserUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     email?: StringFieldUpdateOperationsInput | string
@@ -6807,7 +7063,6 @@ export namespace Prisma {
   }
 
   export type UserUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     email?: StringFieldUpdateOperationsInput | string
@@ -6819,7 +7074,6 @@ export namespace Prisma {
   }
 
   export type UserUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     email?: StringFieldUpdateOperationsInput | string
@@ -6851,7 +7105,6 @@ export namespace Prisma {
   }
 
   export type TaskUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
@@ -6861,7 +7114,6 @@ export namespace Prisma {
   }
 
   export type TaskUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
@@ -6881,7 +7133,6 @@ export namespace Prisma {
   }
 
   export type TaskUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
@@ -6890,7 +7141,6 @@ export namespace Prisma {
   }
 
   export type TaskUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
@@ -6922,7 +7172,6 @@ export namespace Prisma {
   }
 
   export type TimeBlockUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
@@ -6933,7 +7182,6 @@ export namespace Prisma {
   }
 
   export type TimeBlockUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
@@ -6955,7 +7203,6 @@ export namespace Prisma {
   }
 
   export type TimeBlockUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
@@ -6965,7 +7212,6 @@ export namespace Prisma {
   }
 
   export type TimeBlockUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
@@ -6994,7 +7240,6 @@ export namespace Prisma {
   }
 
   export type PomodoroSessionUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isCompleted?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -7003,7 +7248,6 @@ export namespace Prisma {
   }
 
   export type PomodoroSessionUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isCompleted?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -7020,14 +7264,12 @@ export namespace Prisma {
   }
 
   export type PomodoroSessionUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isCompleted?: NullableBoolFieldUpdateOperationsInput | boolean | null
   }
 
   export type PomodoroSessionUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isCompleted?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -7053,7 +7295,6 @@ export namespace Prisma {
   }
 
   export type PomodoroRoundUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     totalSeconds?: IntFieldUpdateOperationsInput | number
@@ -7062,7 +7303,6 @@ export namespace Prisma {
   }
 
   export type PomodoroRoundUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     totalSeconds?: IntFieldUpdateOperationsInput | number
@@ -7080,7 +7320,6 @@ export namespace Prisma {
   }
 
   export type PomodoroRoundUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     totalSeconds?: IntFieldUpdateOperationsInput | number
@@ -7088,7 +7327,6 @@ export namespace Prisma {
   }
 
   export type PomodoroRoundUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     totalSeconds?: IntFieldUpdateOperationsInput | number
@@ -7135,6 +7373,7 @@ export namespace Prisma {
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     mode?: QueryMode
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
+    isSet?: boolean
   }
 
   export type IntNullableFilter<$PrismaModel = never> = {
@@ -7146,6 +7385,7 @@ export namespace Prisma {
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
+    isSet?: boolean
   }
 
   export type TaskListRelationFilter = {
@@ -7164,11 +7404,6 @@ export namespace Prisma {
     every?: PomodoroSessionWhereInput
     some?: PomodoroSessionWhereInput
     none?: PomodoroSessionWhereInput
-  }
-
-  export type SortOrderInput = {
-    sort: SortOrder
-    nulls?: NullsOrder
   }
 
   export type TaskOrderByRelationAggregateInput = {
@@ -7279,6 +7514,7 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
+    isSet?: boolean
   }
 
   export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -7295,6 +7531,7 @@ export namespace Prisma {
     _sum?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedIntNullableFilter<$PrismaModel>
     _max?: NestedIntNullableFilter<$PrismaModel>
+    isSet?: boolean
   }
 
   export type EnumPriorityNullableFilter<$PrismaModel = never> = {
@@ -7302,11 +7539,13 @@ export namespace Prisma {
     in?: $Enums.Priority[] | ListEnumPriorityFieldRefInput<$PrismaModel> | null
     notIn?: $Enums.Priority[] | ListEnumPriorityFieldRefInput<$PrismaModel> | null
     not?: NestedEnumPriorityNullableFilter<$PrismaModel> | $Enums.Priority | null
+    isSet?: boolean
   }
 
   export type BoolNullableFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
     not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
+    isSet?: boolean
   }
 
   export type UserRelationFilter = {
@@ -7352,6 +7591,7 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedEnumPriorityNullableFilter<$PrismaModel>
     _max?: NestedEnumPriorityNullableFilter<$PrismaModel>
+    isSet?: boolean
   }
 
   export type BoolNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -7360,6 +7600,7 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedBoolNullableFilter<$PrismaModel>
     _max?: NestedBoolNullableFilter<$PrismaModel>
+    isSet?: boolean
   }
 
   export type IntFilter<$PrismaModel = never> = {
@@ -7548,16 +7789,17 @@ export namespace Prisma {
     connect?: PomodoroSessionWhereUniqueInput | PomodoroSessionWhereUniqueInput[]
   }
 
-  export type StringFieldUpdateOperationsInput = {
-    set?: string
-  }
-
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
   }
 
+  export type StringFieldUpdateOperationsInput = {
+    set?: string
+  }
+
   export type NullableStringFieldUpdateOperationsInput = {
     set?: string | null
+    unset?: boolean
   }
 
   export type NullableIntFieldUpdateOperationsInput = {
@@ -7566,6 +7808,7 @@ export namespace Prisma {
     decrement?: number
     multiply?: number
     divide?: number
+    unset?: boolean
   }
 
   export type TaskUpdateManyWithoutUserNestedInput = {
@@ -7660,10 +7903,12 @@ export namespace Prisma {
 
   export type NullableEnumPriorityFieldUpdateOperationsInput = {
     set?: $Enums.Priority | null
+    unset?: boolean
   }
 
   export type NullableBoolFieldUpdateOperationsInput = {
     set?: boolean | null
+    unset?: boolean
   }
 
   export type UserUpdateOneRequiredWithoutTasksNestedInput = {
@@ -7803,6 +8048,7 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
+    isSet?: boolean
   }
 
   export type NestedIntNullableFilter<$PrismaModel = never> = {
@@ -7814,6 +8060,7 @@ export namespace Prisma {
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
+    isSet?: boolean
   }
 
   export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
@@ -7873,6 +8120,7 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
+    isSet?: boolean
   }
 
   export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -7889,6 +8137,7 @@ export namespace Prisma {
     _sum?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedIntNullableFilter<$PrismaModel>
     _max?: NestedIntNullableFilter<$PrismaModel>
+    isSet?: boolean
   }
 
   export type NestedFloatNullableFilter<$PrismaModel = never> = {
@@ -7900,6 +8149,7 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+    isSet?: boolean
   }
 
   export type NestedEnumPriorityNullableFilter<$PrismaModel = never> = {
@@ -7907,11 +8157,13 @@ export namespace Prisma {
     in?: $Enums.Priority[] | ListEnumPriorityFieldRefInput<$PrismaModel> | null
     notIn?: $Enums.Priority[] | ListEnumPriorityFieldRefInput<$PrismaModel> | null
     not?: NestedEnumPriorityNullableFilter<$PrismaModel> | $Enums.Priority | null
+    isSet?: boolean
   }
 
   export type NestedBoolNullableFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
     not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
+    isSet?: boolean
   }
 
   export type NestedEnumPriorityNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -7922,6 +8174,7 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedEnumPriorityNullableFilter<$PrismaModel>
     _max?: NestedEnumPriorityNullableFilter<$PrismaModel>
+    isSet?: boolean
   }
 
   export type NestedBoolNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -7930,6 +8183,7 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedBoolNullableFilter<$PrismaModel>
     _max?: NestedBoolNullableFilter<$PrismaModel>
+    isSet?: boolean
   }
 
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
@@ -7984,7 +8238,6 @@ export namespace Prisma {
 
   export type TaskCreateManyUserInputEnvelope = {
     data: TaskCreateManyUserInput | TaskCreateManyUserInput[]
-    skipDuplicates?: boolean
   }
 
   export type TimeBlockCreateWithoutUserInput = {
@@ -8014,7 +8267,6 @@ export namespace Prisma {
 
   export type TimeBlockCreateManyUserInputEnvelope = {
     data: TimeBlockCreateManyUserInput | TimeBlockCreateManyUserInput[]
-    skipDuplicates?: boolean
   }
 
   export type PomodoroSessionCreateWithoutUserInput = {
@@ -8040,7 +8292,6 @@ export namespace Prisma {
 
   export type PomodoroSessionCreateManyUserInputEnvelope = {
     data: PomodoroSessionCreateManyUserInput | PomodoroSessionCreateManyUserInput[]
-    skipDuplicates?: boolean
   }
 
   export type TaskUpsertWithWhereUniqueWithoutUserInput = {
@@ -8174,7 +8425,6 @@ export namespace Prisma {
   }
 
   export type UserUpdateWithoutTasksInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     email?: StringFieldUpdateOperationsInput | string
@@ -8188,7 +8438,6 @@ export namespace Prisma {
   }
 
   export type UserUncheckedUpdateWithoutTasksInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     email?: StringFieldUpdateOperationsInput | string
@@ -8246,7 +8495,6 @@ export namespace Prisma {
   }
 
   export type UserUpdateWithoutTimeBlocksInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     email?: StringFieldUpdateOperationsInput | string
@@ -8260,7 +8508,6 @@ export namespace Prisma {
   }
 
   export type UserUncheckedUpdateWithoutTimeBlocksInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     email?: StringFieldUpdateOperationsInput | string
@@ -8329,7 +8576,6 @@ export namespace Prisma {
 
   export type PomodoroRoundCreateManyPomodoroSessionInputEnvelope = {
     data: PomodoroRoundCreateManyPomodoroSessionInput | PomodoroRoundCreateManyPomodoroSessionInput[]
-    skipDuplicates?: boolean
   }
 
   export type UserUpsertWithoutPomodoroSessionsInput = {
@@ -8344,7 +8590,6 @@ export namespace Prisma {
   }
 
   export type UserUpdateWithoutPomodoroSessionsInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     email?: StringFieldUpdateOperationsInput | string
@@ -8358,7 +8603,6 @@ export namespace Prisma {
   }
 
   export type UserUncheckedUpdateWithoutPomodoroSessionsInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     email?: StringFieldUpdateOperationsInput | string
@@ -8432,7 +8676,6 @@ export namespace Prisma {
   }
 
   export type PomodoroSessionUpdateWithoutRoundsInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isCompleted?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -8440,7 +8683,6 @@ export namespace Prisma {
   }
 
   export type PomodoroSessionUncheckedUpdateWithoutRoundsInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isCompleted?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -8474,7 +8716,6 @@ export namespace Prisma {
   }
 
   export type TaskUpdateWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
@@ -8483,7 +8724,6 @@ export namespace Prisma {
   }
 
   export type TaskUncheckedUpdateWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
@@ -8492,7 +8732,6 @@ export namespace Prisma {
   }
 
   export type TaskUncheckedUpdateManyWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
@@ -8501,7 +8740,6 @@ export namespace Prisma {
   }
 
   export type TimeBlockUpdateWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
@@ -8511,7 +8749,6 @@ export namespace Prisma {
   }
 
   export type TimeBlockUncheckedUpdateWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
@@ -8521,7 +8758,6 @@ export namespace Prisma {
   }
 
   export type TimeBlockUncheckedUpdateManyWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     name?: StringFieldUpdateOperationsInput | string
@@ -8531,7 +8767,6 @@ export namespace Prisma {
   }
 
   export type PomodoroSessionUpdateWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isCompleted?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -8539,7 +8774,6 @@ export namespace Prisma {
   }
 
   export type PomodoroSessionUncheckedUpdateWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isCompleted?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -8547,7 +8781,6 @@ export namespace Prisma {
   }
 
   export type PomodoroSessionUncheckedUpdateManyWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     isCompleted?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -8562,7 +8795,6 @@ export namespace Prisma {
   }
 
   export type PomodoroRoundUpdateWithoutPomodoroSessionInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     totalSeconds?: IntFieldUpdateOperationsInput | number
@@ -8570,7 +8802,6 @@ export namespace Prisma {
   }
 
   export type PomodoroRoundUncheckedUpdateWithoutPomodoroSessionInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     totalSeconds?: IntFieldUpdateOperationsInput | number
@@ -8578,7 +8809,6 @@ export namespace Prisma {
   }
 
   export type PomodoroRoundUncheckedUpdateManyWithoutPomodoroSessionInput = {
-    id?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     totalSeconds?: IntFieldUpdateOperationsInput | number
